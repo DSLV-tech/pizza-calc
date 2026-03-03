@@ -217,11 +217,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 16px;
             width: 100%;
             max-width: 640px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .btn-mech {
@@ -779,8 +785,26 @@
                 font-size: 1.1rem;
             }
 
-            .controls-divider {
-                height: 40px;
+            .controls-bar {
+                gap: 12px;
+                flex-direction: column;
+            }
+
+            .controls-group {
+                width: 100%;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .controls-group.extra-options {
+                background: rgba(255, 255, 255, 0.05);
+                padding: 10px;
+                border-radius: 12px;
+                gap: 15px;
+            }
+
+            .mobile-hide {
+                display: none;
             }
 
             .btn-opt {
@@ -872,27 +896,37 @@
 
     <!-- CONTROLS BAR -->
     <div class="controls-bar">
-        <button class="btn-mech btn-reset" id="btn-reset" onclick="resetAll()" aria-label="Reset comanda">
-            <span class="icon">✕</span> Reset
-        </button>
-        <button class="btn-mech btn-undo" id="btn-undo" onclick="removeLast()" aria-label="Annulla ultimo">
-            <span class="icon">←</span> Canc
-        </button>
-        <button class="btn-mech btn-add" id="btn-add" onclick="pushToHistory()" aria-label="Aggiungi alla comanda">
-            <span class="icon">+</span> Invio
-        </button>
-        <div class="controls-divider"></div>
-        <div class="opt-group">
-            <span class="opt-label">🍞</span>
-            <button class="btn-opt" onclick="addDoppio(1.00)" aria-label="Aggiungi 1 euro">+€1</button>
-            <button class="btn-opt" onclick="addDoppio(0.50)" aria-label="Aggiungi 50 centesimi">+50c</button>
-            <span class="opt-total" id="doppio-total"></span>
+        <div class="controls-group main-actions">
+            <button class="btn-mech btn-reset" id="btn-reset" onclick="resetAll()" aria-label="Reset comanda">
+                <span class="icon">✕</span> Reset
+            </button>
+            <button class="btn-mech btn-undo" id="btn-undo" onclick="removeLast()" aria-label="Annulla ultimo">
+                <span class="icon">←</span> Canc
+            </button>
+            <button class="btn-mech btn-add" id="btn-add" onclick="pushToHistory()" aria-label="Aggiungi alla comanda">
+                <span class="icon">+</span> Invio
+            </button>
         </div>
-        <div class="controls-divider"></div>
-        <div class="opt-group">
-            <span class="opt-label">🚚</span>
-            <button class="btn-opt" id="btn-trasp-1" onclick="setTrasporto(1)" aria-label="Trasporto 1 euro">€1</button>
-            <button class="btn-opt" id="btn-trasp-2" onclick="setTrasporto(2)" aria-label="Trasporto 2 euro">€2</button>
+
+        <div class="controls-divider mobile-hide"></div>
+
+        <div class="controls-group extra-options">
+            <div class="opt-group">
+                <span class="opt-label">🍞</span>
+                <button class="btn-opt" onclick="addDoppio(1.00)" aria-label="Aggiungi 1 euro">+€1</button>
+                <button class="btn-opt" onclick="addDoppio(0.50)" aria-label="Aggiungi 50 centesimi">+50c</button>
+                <span class="opt-total" id="doppio-total"></span>
+            </div>
+
+            <div class="controls-divider mobile-hide"></div>
+
+            <div class="opt-group">
+                <span class="opt-label">🚚</span>
+                <button class="btn-opt" id="btn-trasp-1" onclick="setTrasporto(1)"
+                    aria-label="Trasporto 1 euro">€1</button>
+                <button class="btn-opt" id="btn-trasp-2" onclick="setTrasporto(2)"
+                    aria-label="Trasporto 2 euro">€2</button>
+            </div>
         </div>
     </div>
 
