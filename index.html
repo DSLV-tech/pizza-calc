@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PizzAtoma Pro - Calcolatrice Professionale</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+            --accent: #ff9800;
+            --classica: #d32f2f; 
+            --speciale: #fbc02d; 
+            --calzone: #1976d2;  
+            --extra: #388e3c;    
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+        }
+
+        #display {
+            background: var(--card);
+            width: 95%;
+            max-width: 900px;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            border: 2px solid var(--accent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .totale-riga { font-size: 2.8rem; font-weight: bold; color: var(--accent); text-align: right; }
+        .dettaglio-riga { font-size: 1rem; color: #bbb; min-height: 3em; border-bottom: 1px solid #333; margin-bottom: 10px; }
+
+        .section-label {
+            width: 100%;
+            max-width: 900px;
+            margin: 15px 0 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            background: var(--card);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+            user-select: none;
+        }
+
+        .cell:active { transform: scale(0.92); }
+        .cell.active { border-color: white; background: #444; }
+
+        .cell .price { font-size: 0.7rem; opacity: 0.8; }
+        .cell .symbol { font-size: 1.6rem; font-weight: bold; margin: auto 0; text-align: center; }
+        .cell .name { font-size: 0.55rem; text-align: center; white-space: nowrap; overflow: hidden; }
+
+        /* Colori */
+        .cat-cl { background-color: var(--classica); }
+        .cat-ca { background-color: var(--calzone); }
+        .cat-sp { background-color: var(--speciale); color: #000; }
+        .cat-ex { background-color: var(--extra); }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            background: #333;
+        }
+
+        .btn.active { background: var(--accent); }
+        .btn-reset { background: #b71c1c; }
+    </style>
+</head>
+<body>
+
+    <div id="display">
+        <div class="dettaglio-riga" id="log">Inizia selezionando una pizza</div>
+        <div class="totale-riga" id="totale">0.00 €</div>
+    </div>
+
+    <div class="section-label">Basi Pizze e Calzoni</div>
+    <div class="grid" id="pizza-grid"></div>
+
+    <div class="section-label">Ingredienti Extra</div>
+    <div class="grid" id="extra-grid"></div>
+
+    <div class="section-label">Servizi e Impasti</div>
+    <div class="controls">
+        <button class="btn" id="btn-doppio" onclick="toggleOption('doppio', 1.5)">DOPPIO IMPASTO (+1.50€)</button>
+        <button class="btn" id="btn-trasporto" onclick="toggleOption('trasporto', 2.5)">TRASPORTO (+2.50€)</button>
+        <button class="btn btn-reset" onclick="resetAll()">RESET</button>
+    </div>
+
+    <script>
+        const pizze = [
+            { id: 'Fc', n: 'Focaccia', p: 4.0, c: 'cl' }, { id: 'Ma', n: 'Marinara', p: 4.5, c: 'cl' },
+            { id: 'Mg', n: 'Margherita', p: 5.0, c: 'cl' }, { id: 'Rg', n: 'Regina', p: 8.0, c: 'cl' },
+            { id: 'Pr', n: 'Prosciutto', p: 7.0, c: 'cl' }, { id: 'PF', n: 'Prosc. Funghi', p: 7.0, c: 'cl' },
+            { id: 'Cp', n: 'Capricciosa', p: 8.0, c: 'cl' }, { id: 'Di', n: 'Diavola', p: 7.0, c: 'cl' },
+            { id: '4S', n: '4 Stagioni', p: 7.0, c: 'cl' }, { id: 'Na', n: 'Napoli', p: 7.0, c: 'cl' },
+            { id: 'Ro', n: 'Romana', p: 7.0, c: 'cl' }, { id: 'TC', n: 'Tonno Cip.', p: 8.0, c: 'cl' },
+            { id: '4F', n: '4 Formaggi', p: 8.0, c: 'cl' }, { id: 'Ve', n: 'Vegetariana', p: 7.0, c: 'cl' },
+            { id: 'CC', n: 'Calzone Cl.', p: 7.0, c: 'ca' }, { id: 'CF', n: 'Calzone Far.', p: 8.0, c: 'ca' },
+            { id: 'CFr', n: 'Calzone Fr.', p: 9.0, c: 'ca' }, { id: 'Pa', n: 'Patapizza', p: 7.5, c: 'sp' },
+            { id: 'Am', n: 'Americana', p: 8.0, c: 'sp' }, { id: 'Ca', n: 'Calamari Fr.', p: 9.0, c: 'sp' },
+            { id: 'SF', n: 'Salsiccia Fri.', p: 8.0, c: 'sp' }, { id: 'Sa', n: 'Saporita', p: 8.0, c: 'sp' },
+            { id: 'Mc', n: 'Marcolino', p: 8.5, c: 'sp' }, { id: 'Es', n: 'Estiva', p: 8.0, c: 'sp' },
+            { id: 'Tn', n: 'Tonnara', p: 8.0, c: 'sp' }, { id: 'Cb', n: 'Calabrese', p: 8.5, c: 'sp' },
+            { id: 'Lo', n: 'Longobarda', p: 8.5, c: 'sp' }, { id: 'Bo', n: 'Boscaiola', p: 8.5, c: 'sp' },
+            { id: 'De', n: 'Delizia', p: 9.0, c: 'sp' }, { id: 'Be', n: 'Bella', p: 10.0, c: 'sp' },
+            { id: 'Dv', n: 'Dolcevita', p: 8.0, c: 'sp' }, { id: 'Rs', n: 'Rosita', p: 10.0, c: 'sp' },
+            { id: 'Fr', n: 'Frecciarossa', p: 8.0, c: 'sp' }, { id: 'Pm', n: 'Parmigiana', p: 7.5, c: 'sp' },
+            { id: 'Ne', n: 'Nerano', p: 9.0, c: 'sp' }, { id: 'No', n: 'Nordica', p: 10.0, c: 'sp' },
+            { id: 'Mz', n: 'Mortazza', p: 11.0, c: 'sp' }, { id: 'Mn', n: 'Montanara', p: 10.0, c: 'sp' },
+            { id: 'Ti', n: 'Tramonto It.', p: 10.0, c: 'sp' }
+        ];
+
+        const ingredienti = [
+            { id: 'Pt', n: 'Patate Fr.', p: 1.5 }, { id: 'Bu', n: 'Burrata', p: 2.5 },
+            { id: 'Mz', n: 'Extra Mozz.', p: 1.0 }, { id: 'Cr', n: 'P. Crudo', p: 2.0 },
+            { id: 'Vd', n: 'Verdure', p: 1.0 }, { id: 'Nd', n: 'Nduja', p: 1.5 },
+            { id: 'Pc', n: 'Pancetta', p: 1.5 }, { id: 'Uo', n: 'Uovo', p: 1.0 }
+        ];
+
+        let selection = { base: null, extras: [], doppio: false, trasporto: false };
+
+        function render() {
+            const pGrid = document.getElementById('pizza-grid');
+            pizze.forEach(p => {
+                const div = document.createElement('div');
+                div.className = `cell cat-${p.c}`;
+                div.innerHTML = `<div class="price">${p.p}€</div><div class="symbol">${p.id}</div><div class="name">${p.n}</div>`;
+                div.onclick = () => { selection.base = p; update(); };
+                pGrid.appendChild(div);
+            });
+
+            const eGrid = document.getElementById('extra-grid');
+            ingredienti.forEach(i => {
+                const div = document.createElement('div');
+                div.className = `cell cat-ex`;
+                div.id = `extra-${i.id}`;
+                div.innerHTML = `<div class="price">+${i.p}€</div><div class="symbol">${i.id}</div><div class="name">${i.n}</div>`;
+                div.onclick = () => toggleExtra(i);
+                eGrid.appendChild(div);
+            });
+        }
+
+        function toggleExtra(ing) {
+            const index = selection.extras.findIndex(x => x.id === ing.id);
+            if (index > -1) selection.extras.splice(index, 1);
+            else selection.extras.push(ing);
+            document.getElementById(`extra-${ing.id}`).classList.toggle('active');
+            update();
+        }
+
+        function toggleOption(type, price) {
+            selection[type] = !selection[type];
+            document.getElementById(`btn-${type}`).classList.toggle('active');
+            update();
+        }
+
+        function update() {
+            let tot = 0;
+            let res = "";
+            if (selection.base) {
+                tot += selection.base.p;
+                res += `<strong>${selection.base.n}</strong>`;
+            }
+            selection.extras.forEach(e => { tot += e.p; res += ` + ${e.n}`; });
+            if (selection.doppio) { tot += 1.5; res += " + Doppio Impasto"; }
+            if (selection.trasporto) { tot += 2.5; res += " + Trasporto"; }
+            
+            document.getElementById('totale').innerText = tot.toFixed(2) + " €";
+            document.getElementById('log').innerHTML = res || "Seleziona una pizza";
+        }
+
+        function resetAll() {
+            selection = { base: null, extras: [], doppio: false, trasporto: false };
+            document.querySelectorAll('.cell, .btn').forEach(el => el.classList.remove('active'));
+            update();
+        }
+
+        render();
+    </script>
+</body>
+</html>
