@@ -3,226 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PizzAtoma Pro - Calcolatrice Professionale</title>
+    <title>Da Marcolino - Calcolatrice Comande</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Oswald:wght@400;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #121212;
-            --card: #1e1e1e;
-            --text: #e0e0e0;
-            --accent: #ff9800;
-            --classica: #d32f2f; 
-            --speciale: #fbc02d; 
-            --calzone: #1976d2;  
-            --extra: #388e3c;    
+            --rosso-napoli: #D81B1B;
+            --rosso-profondo: #9B0D0D;
+            --nero-inchiostro: #0D0D0D;
+            --bianco-carta: #FFFDF5;
+            --avorio: #F0EBD8;
+            --extra-green: #2d5a27;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            font-family: 'Oswald', sans-serif;
+            background-color: var(--avorio);
+            color: var(--nero-inchiostro);
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 15px;
+            padding: 10px;
         }
 
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        header h1 {
+            font-family: 'Alfa Slab One', cursive;
+            color: var(--rosso-napoli);
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 2rem;
+        }
+
+        /* DISPLAY COMANDA STILE "SCONTRINO" */
         #display {
-            background: var(--card);
-            width: 95%;
-            max-width: 900px;
-            padding: 15px;
-            border-radius: 12px;
+            background: var(--bianco-carta);
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            border-radius: 4px;
             margin-bottom: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             position: sticky;
-            top: 10px;
-            z-index: 100;
-            border: 2px solid var(--accent);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            top: 5px;
+            z-index: 1000;
         }
 
-        .totale-riga { font-size: 2.8rem; font-weight: bold; color: var(--accent); text-align: right; }
-        .dettaglio-riga { font-size: 1rem; color: #bbb; min-height: 3em; border-bottom: 1px solid #333; margin-bottom: 10px; }
+        .comanda-lista {
+            max-height: 180px;
+            overflow-y: auto;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            border-bottom: 2px dashed #ccc;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+        }
 
+        .item-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
+
+        .current-build {
+            font-weight: 600;
+            color: var(--rosso-profondo);
+            min-height: 1.5em;
+            font-size: 1.2rem;
+        }
+
+        .totale-riga {
+            font-family: 'Alfa Slab One', sans-serif;
+            font-size: 2.5rem;
+            color: var(--rosso-napoli);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        /* GRIGLIE E PULSANTI */
         .section-label {
             width: 100%;
-            max-width: 900px;
+            max-width: 800px;
+            background: var(--nero-inchiostro);
+            color: var(--bianco-carta);
+            padding: 5px 15px;
             margin: 15px 0 10px;
             font-weight: bold;
             text-transform: uppercase;
-            color: var(--accent);
-            border-left: 4px solid var(--accent);
-            padding-left: 10px;
+            letter-spacing: 1px;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            gap: 6px;
             width: 100%;
-            max-width: 900px;
-            margin-bottom: 20px;
+            max-width: 800px;
         }
 
         .cell {
             aspect-ratio: 1/1;
-            background: var(--card);
-            border-radius: 6px;
+            background: var(--bianco-carta);
+            border: 2px solid var(--nero-inchiostro);
             display: flex;
             flex-direction: column;
-            padding: 6px;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            transition: 0.2s;
-            border: 2px solid transparent;
-            user-select: none;
+            transition: 0.1s;
+            text-align: center;
+            padding: 4px;
         }
 
-        .cell:active { transform: scale(0.92); }
-        .cell.active { border-color: white; background: #444; }
+        .cell:active { transform: scale(0.95); }
+        .cell.active { background: var(--rosso-napoli); color: white; border-color: var(--rosso-profondo); }
 
-        .cell .price { font-size: 0.7rem; opacity: 0.8; }
-        .cell .symbol { font-size: 1.6rem; font-weight: bold; margin: auto 0; text-align: center; }
-        .cell .name { font-size: 0.55rem; text-align: center; white-space: nowrap; overflow: hidden; }
+        .cell .symbol { font-family: 'Alfa Slab One'; font-size: 1.4rem; }
+        .cell .price { font-size: 0.75rem; font-weight: bold; }
+        .cell .name { font-size: 0.6rem; text-transform: uppercase; margin-top: 2px; line-height: 1; }
 
-        /* Colori */
-        .cat-cl { background-color: var(--classica); }
-        .cat-ca { background-color: var(--calzone); }
-        .cat-sp { background-color: var(--speciale); color: #000; }
-        .cat-ex { background-color: var(--extra); }
-
-        .controls {
-            display: flex;
+        /* PULSANTI AZIONE */
+        .action-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             width: 100%;
-            max-width: 900px;
-            margin-bottom: 30px;
+            max-width: 800px;
+            margin: 20px 0;
         }
 
         .btn {
-            flex: 1;
             padding: 15px;
-            border-radius: 8px;
-            border: none;
+            font-family: 'Oswald';
             font-weight: bold;
+            text-transform: uppercase;
+            border: 2px solid var(--nero-inchiostro);
             cursor: pointer;
-            color: white;
-            background: #333;
+            font-size: 1rem;
         }
 
-        .btn.active { background: var(--accent); }
-        .btn-reset { background: #b71c1c; }
+        .btn-add { background: var(--rosso-napoli); color: white; grid-column: span 2; font-size: 1.3rem; }
+        .btn-del { background: #fff; color: var(--nero-inchiostro); }
+        .btn-reset { background: var(--nero-inchiostro); color: white; }
+        .btn-opt.active { background: var(--rosso-profondo); color: white; }
+
     </style>
 </head>
 <body>
 
+    <header>
+        <h1>Da Marcolino</h1>
+        <small>TRATTORIA • PIZZERIA • STROPPIANA</small>
+    </header>
+
     <div id="display">
-        <div class="dettaglio-riga" id="log">Inizia selezionando una pizza</div>
+        <div class="comanda-lista" id="lista-comanda">Comanda vuota</div>
+        <div class="current-build" id="build-text">Seleziona una pizza...</div>
         <div class="totale-riga" id="totale">0.00 €</div>
     </div>
 
-    <div class="section-label">Basi Pizze e Calzoni</div>
-    <div class="grid" id="pizza-grid"></div>
-
-    <div class="section-label">Ingredienti Extra</div>
-    <div class="grid" id="extra-grid"></div>
-
-    <div class="section-label">Servizi e Impasti</div>
-    <div class="controls">
-        <button class="btn" id="btn-doppio" onclick="toggleOption('doppio', 1.5)">DOPPIO IMPASTO (+1.50€)</button>
-        <button class="btn" id="btn-trasporto" onclick="toggleOption('trasporto', 2.5)">TRASPORTO (+2.50€)</button>
-        <button class="btn btn-reset" onclick="resetAll()">RESET</button>
+    <div class="action-bar">
+        <button class="btn btn-add" onclick="addCurrent()">➕ AGGIUNGI ALL'ORDINE</button>
+        <button class="btn btn-del" onclick="removeLast()">↩️ RIMUOVI ULTIMA</button>
+        <button class="btn btn-reset" onclick="resetAll()">🗑️ SVUOTA TUTTO</button>
+        <button class="btn btn-opt" id="btn-trasporto" onclick="toggleTrasporto()">🚚 TRASPORTO (+2.50)</button>
+        <button class="btn btn-opt" id="btn-doppio" onclick="toggleDoppio()">🍞 DOPPIO IMPASTO (+1.50)</button>
     </div>
 
+    <div class="section-label">Le Classiche</div>
+    <div class="grid" id="grid-cl"></div>
+
+    <div class="section-label">Le Speciali</div>
+    <div class="grid" id="grid-sp"></div>
+
+    <div class="section-label">Ingredienti Extra</div>
+    <div class="grid" id="grid-ex"></div>
+
     <script>
+        // Dati estratti dal menu ufficiale e dalla brand identity
         const pizze = [
             { id: 'Fc', n: 'Focaccia', p: 4.0, c: 'cl' }, { id: 'Ma', n: 'Marinara', p: 4.5, c: 'cl' },
-            { id: 'Mg', n: 'Margherita', p: 5.0, c: 'cl' }, { id: 'Rg', n: 'Regina', p: 8.0, c: 'cl' },
-            { id: 'Pr', n: 'Prosciutto', p: 7.0, c: 'cl' }, { id: 'PF', n: 'Prosc. Funghi', p: 7.0, c: 'cl' },
-            { id: 'Cp', n: 'Capricciosa', p: 8.0, c: 'cl' }, { id: 'Di', n: 'Diavola', p: 7.0, c: 'cl' },
+            { id: 'Mg', n: 'Margherita', p: 5.0, c: 'cl' }, { id: 'Pr', n: 'Prosciutto', p: 7.0, c: 'cl' },
+            { id: 'PF', n: 'Prosc. Funghi', p: 7.0, c: 'cl' }, { id: 'Di', n: 'Diavola', p: 7.0, c: 'cl' },
             { id: '4S', n: '4 Stagioni', p: 7.0, c: 'cl' }, { id: 'Na', n: 'Napoli', p: 7.0, c: 'cl' },
-            { id: 'Ro', n: 'Romana', p: 7.0, c: 'cl' }, { id: 'TC', n: 'Tonno Cip.', p: 8.0, c: 'cl' },
-            { id: '4F', n: '4 Formaggi', p: 8.0, c: 'cl' }, { id: 'Ve', n: 'Vegetariana', p: 7.0, c: 'cl' },
-            { id: 'CC', n: 'Calzone Cl.', p: 7.0, c: 'ca' }, { id: 'CF', n: 'Calzone Far.', p: 8.0, c: 'ca' },
-            { id: 'CFr', n: 'Calzone Fr.', p: 9.0, c: 'ca' }, { id: 'Pa', n: 'Patapizza', p: 7.5, c: 'sp' },
-            { id: 'Am', n: 'Americana', p: 8.0, c: 'sp' }, { id: 'Ca', n: 'Calamari Fr.', p: 9.0, c: 'sp' },
-            { id: 'SF', n: 'Salsiccia Fri.', p: 8.0, c: 'sp' }, { id: 'Sa', n: 'Saporita', p: 8.0, c: 'sp' },
-            { id: 'Mc', n: 'Marcolino', p: 8.5, c: 'sp' }, { id: 'Es', n: 'Estiva', p: 8.0, c: 'sp' },
-            { id: 'Tn', n: 'Tonnara', p: 8.0, c: 'sp' }, { id: 'Cb', n: 'Calabrese', p: 8.5, c: 'sp' },
-            { id: 'Lo', n: 'Longobarda', p: 8.5, c: 'sp' }, { id: 'Bo', n: 'Boscaiola', p: 8.5, c: 'sp' },
-            { id: 'De', n: 'Delizia', p: 9.0, c: 'sp' }, { id: 'Be', n: 'Bella', p: 10.0, c: 'sp' },
-            { id: 'Dv', n: 'Dolcevita', p: 8.0, c: 'sp' }, { id: 'Rs', n: 'Rosita', p: 10.0, c: 'sp' },
-            { id: 'Fr', n: 'Frecciarossa', p: 8.0, c: 'sp' }, { id: 'Pm', n: 'Parmigiana', p: 7.5, c: 'sp' },
-            { id: 'Ne', n: 'Nerano', p: 9.0, c: 'sp' }, { id: 'No', n: 'Nordica', p: 10.0, c: 'sp' },
-            { id: 'Mz', n: 'Mortazza', p: 11.0, c: 'sp' }, { id: 'Mn', n: 'Montanara', p: 10.0, c: 'sp' },
-            { id: 'Ti', n: 'Tramonto It.', p: 10.0, c: 'sp' }
+            { id: 'Ro', n: 'Romana', p: 7.0, c: 'cl' }, { id: 'Ve', n: 'Vegetariana', p: 7.0, c: 'cl' },
+            { id: 'Cp', n: 'Capricciosa', p: 8.0, c: 'cl' }, { id: 'TC', n: 'Tonno Cip.', p: 8.0, c: 'cl' },
+            { id: '4F', n: '4 Formaggi', p: 8.0, c: 'cl' }, { id: 'Rg', n: 'Regina', p: 8.0, c: 'cl' },
+            { id: 'Pa', n: 'Patapizza', p: 7.5, c: 'sp' }, { id: 'Pm', n: 'Parmigiana', p: 7.5, c: 'sp' },
+            { id: 'Am', n: 'Americana', p: 8.0, c: 'sp' }, { id: 'SF', n: 'Salsiccia Fri.', p: 8.0, c: 'sp' },
+            { id: 'Sa', n: 'Saporita', p: 8.0, c: 'sp' }, { id: 'Es', n: 'Estiva', p: 8.0, c: 'sp' },
+            { id: 'Tn', n: 'Tonnara', p: 8.0, c: 'sp' }, { id: 'Mc', n: 'Marcolino', p: 8.5, c: 'sp' },
+            { id: 'Cb', n: 'Calabrese', p: 8.5, c: 'sp' }, { id: 'Lo', n: 'Longobarda', p: 8.5, c: 'sp' },
+            { id: 'Bo', n: 'Boscaiola', p: 8.5, c: 'sp' }, { id: 'Ca', n: 'Calamari Fr.', p: 9.0, c: 'sp' },
+            { id: 'De', n: 'Delizia', p: 9.0, c: 'sp' }, { id: 'Ne', n: 'Nerano', p: 9.0, c: 'sp' },
+            { id: 'Be', n: 'Bella', p: 10.0, c: 'sp' }, { id: 'Rs', n: 'Rosita', p: 10.0, c: 'sp' },
+            { id: 'No', n: 'Nordica', p: 10.0, c: 'sp' }, { id: 'Mn', n: 'Montanara', p: 10.0, c: 'sp' },
+            { id: 'Ti', n: 'Tramonto It.', p: 10.0, c: 'sp' }, { id: 'Mz', n: 'Mortazza', p: 11.0, c: 'sp' }
         ];
 
         const ingredienti = [
-            { id: 'Pt', n: 'Patate Fr.', p: 1.5 }, { id: 'Bu', n: 'Burrata', p: 2.5 },
-            { id: 'Mz', n: 'Extra Mozz.', p: 1.0 }, { id: 'Cr', n: 'P. Crudo', p: 2.0 },
-            { id: 'Vd', n: 'Verdure', p: 1.0 }, { id: 'Nd', n: 'Nduja', p: 1.5 },
-            { id: 'Pc', n: 'Pancetta', p: 1.5 }, { id: 'Uo', n: 'Uovo', p: 1.0 }
+            { id: 'Pt', n: 'Patatine', p: 1.5 }, { id: 'Br', n: 'Burrata', p: 2.5 },
+            { id: 'Mo', n: 'Mozzarella', p: 1.0 }, { id: 'Cu', n: 'Crudo', p: 2.0 },
+            { id: 'Vd', n: 'Verdure', p: 1.0 }, { id: 'Nj', n: 'Nduja', p: 1.5 }
         ];
 
-        let selection = { base: null, extras: [], doppio: false, trasporto: false };
+        let comanda = [];
+        let current = { base: null, extras: [], doppio: false };
+        let trasporto = 0;
 
-        function render() {
-            const pGrid = document.getElementById('pizza-grid');
+        function init() {
+            const grids = { cl: document.getElementById('grid-cl'), sp: document.getElementById('grid-sp') };
             pizze.forEach(p => {
-                const div = document.createElement('div');
-                div.className = `cell cat-${p.c}`;
-                div.innerHTML = `<div class="price">${p.p}€</div><div class="symbol">${p.id}</div><div class="name">${p.n}</div>`;
-                div.onclick = () => { selection.base = p; update(); };
-                pGrid.appendChild(div);
+                const div = createCell(p, () => { current.base = p; update(); });
+                grids[p.c].appendChild(div);
             });
-
-            const eGrid = document.getElementById('extra-grid');
+            const exGrid = document.getElementById('grid-ex');
             ingredienti.forEach(i => {
-                const div = document.createElement('div');
-                div.className = `cell cat-ex`;
-                div.id = `extra-${i.id}`;
-                div.innerHTML = `<div class="price">+${i.p}€</div><div class="symbol">${i.id}</div><div class="name">${i.n}</div>`;
-                div.onclick = () => toggleExtra(i);
-                eGrid.appendChild(div);
+                const div = createCell(i, () => toggleExtra(i), true);
+                exGrid.appendChild(div);
             });
         }
 
-        function toggleExtra(ing) {
-            const index = selection.extras.findIndex(x => x.id === ing.id);
-            if (index > -1) selection.extras.splice(index, 1);
-            else selection.extras.push(ing);
-            document.getElementById(`extra-${ing.id}`).classList.toggle('active');
+        function createCell(obj, action, isExtra = false) {
+            const div = document.createElement('div');
+            div.className = 'cell';
+            if(isExtra) div.id = `ex-${obj.id}`;
+            div.innerHTML = `<div class="price">${obj.p.toFixed(1)}€</div><div class="symbol">${obj.id}</div><div class="name">${obj.n}</div>`;
+            div.onclick = action;
+            return div;
+        }
+
+        function toggleExtra(i) {
+            const idx = current.extras.findIndex(x => x.id === i.id);
+            if(idx > -1) current.extras.splice(idx, 1);
+            else current.extras.push(i);
+            document.getElementById(`ex-${i.id}`).classList.toggle('active');
             update();
         }
 
-        function toggleOption(type, price) {
-            selection[type] = !selection[type];
-            document.getElementById(`btn-${type}`).classList.toggle('active');
-            update();
-        }
+        function toggleDoppio() { current.doppio = !current.doppio; document.getElementById('btn-doppio').classList.toggle('active'); update(); }
+        function toggleTrasporto() { trasporto = trasporto === 0 ? 2.5 : 0; document.getElementById('btn-trasporto').classList.toggle('active'); update(); }
 
         function update() {
-            let tot = 0;
-            let res = "";
-            if (selection.base) {
-                tot += selection.base.p;
-                res += `<strong>${selection.base.n}</strong>`;
-            }
-            selection.extras.forEach(e => { tot += e.p; res += ` + ${e.n}`; });
-            if (selection.doppio) { tot += 1.5; res += " + Doppio Impasto"; }
-            if (selection.trasporto) { tot += 2.5; res += " + Trasporto"; }
-            
-            document.getElementById('totale').innerText = tot.toFixed(2) + " €";
-            document.getElementById('log').innerHTML = res || "Seleziona una pizza";
+            let txt = current.base ? current.base.n : "";
+            current.extras.forEach(e => txt += ` + ${e.n}`);
+            if(current.doppio) txt += " (D.I.)";
+            document.getElementById('build-text').innerText = txt || "Seleziona una pizza...";
+
+            let runningTot = comanda.reduce((a, b) => a + b.p, 0);
+            let curTot = current.base ? current.base.p : 0;
+            current.extras.forEach(e => curTot += e.p);
+            if(current.doppio) curTot += 1.5;
+
+            document.getElementById('totale').innerText = (runningTot + curTot + trasporto).toFixed(2) + " €";
         }
 
-        function resetAll() {
-            selection = { base: null, extras: [], doppio: false, trasporto: false };
-            document.querySelectorAll('.cell, .btn').forEach(el => el.classList.remove('active'));
+        function addCurrent() {
+            if(!current.base) return;
+            let p = current.base.p;
+            let n = current.base.n;
+            current.extras.forEach(e => { p += e.p; n += ` + ${e.n}`; });
+            if(current.doppio) { p += 1.5; n += " (D.I.)"; }
+            
+            comanda.push({ n, p });
+            current = { base: null, extras: [], doppio: false };
+            document.querySelectorAll('.cell, .btn-opt').forEach(el => { if(el.id !== 'btn-trasporto') el.classList.remove('active'); });
+            renderComanda();
             update();
         }
 
-        render();
+        function renderComanda() {
+            const l = document.getElementById('lista-comanda');
+            if(comanda.length === 0) { l.innerText = "Comanda vuota"; return; }
+            l.innerHTML = comanda.map(i => `<div class="item-line"><span>${i.n}</span><span>${i.p.toFixed(2)}€</span></div>`).join('');
+            l.scrollTop = l.scrollHeight;
+        }
+
+        function removeLast() { comanda.pop(); renderComanda(); update(); }
+        function resetAll() { if(confirm("Azzero tutto?")) { comanda = []; trasporto = 0; resetUI(); update(); renderComanda(); } }
+        function resetUI() { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); }
+
+        init();
     </script>
 </body>
 </html>
