@@ -1,202 +1,1234 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Da Marcolino - Pizza Calc Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Oswald:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <meta name="description" content="Da Marcolino — Calcolatore comande pizzeria. Veloce, intuitivo, offline.">
+    <title>Da Marcolino — Pizza Calc Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Oswald:wght@400;600;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
     <style>
+        /* ============================================
+           DESIGN SYSTEM — TAVOLA PERIODICA + CALC
+           ============================================ */
         :root {
-            --rosso-napoli: #D81B1B; /*  */
-            --nero-inchiostro: #0D0D0D; /*  */
-            --bianco-carta: #FFFDF5; /*  */
-            --avorio: #F0EBD8; /*  */
-            --verde-go: #27ae60;
-            --giallo-warn: #f1c40f;
+            --bg-deep: #111116;
+            --bg-surface: #1b1b22;
+            --bg-card: #23232e;
+            --bg-card-hover: #2c2c3a;
+
+            --text-primary: #f0ece2;
+            --text-secondary: #9a9aaa;
+            --text-dim: #5a5a6e;
+
+            --accent-red: #e63946;
+            --accent-gold: #f4a300;
+            --accent-green: #2ec46a;
+            --accent-blue: #4ea8de;
+
+            --lcd-green: #39ff5e;
+            --lcd-amber: #ffbf00;
+            --lcd-bg: #0a0f0a;
+
+            --border-subtle: #2e2e3e;
+            --border-medium: #3e3e50;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
+            --shadow-btn: 0 4px 0 rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 12px rgba(57, 255, 94, 0.15);
+
+            --font-display: 'Alfa Slab One', serif;
+            --font-body: 'Oswald', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Oswald', sans-serif;
-            background-color: var(--avorio);
-            color: var(--nero-inchiostro);
-            margin: 0; padding: 10px;
-            display: flex; flex-direction: column; align-items: center;
+            font-family: var(--font-body);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* DISPLAY STILE CALCOLATRICE LCD */
-        #calculator-screen {
-            background: #222;
-            width: 95%; max-width: 600px;
-            padding: 15px;
-            border-radius: 10px;
-            border: 4px solid #444;
-            box-shadow: inset 0 0 10px #000;
+        /* === HEADER === */
+        .app-header {
+            width: 100%;
+            max-width: 640px;
+            text-align: center;
             margin-bottom: 20px;
-            color: #00ff41; /* Verde Matrix/LCD */
-            font-family: 'Share Tech Mono', monospace;
         }
 
-        .lcd-history { height: 80px; overflow-y: auto; font-size: 0.85rem; border-bottom: 1px solid #333; margin-bottom: 10px; opacity: 0.8; }
-        .lcd-current { font-size: 1.1rem; min-height: 1.4em; color: #fff; }
-        .lcd-total { font-size: 3rem; text-align: right; font-weight: bold; color: var(--giallo-warn); }
-
-        /* TASTI FUNZIONE CIRCOLARI */
-        .circle-actions {
-            display: flex; justify-content: space-around;
-            width: 100%; max-width: 600px; margin-bottom: 25px;
+        .app-logo {
+            height: 36px;
+            width: auto;
+            /* Colorize black SVG to accent-red (~hsl(355,80%,57%)) */
+            filter: invert(35%) sepia(80%) saturate(2000%) hue-rotate(335deg) brightness(90%);
         }
 
-        .btn-circle {
-            width: 75px; height: 75px; border-radius: 50%;
-            border: 3px solid var(--nero-inchiostro);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            font-size: 0.7rem; font-weight: bold; cursor: pointer;
-            transition: 0.2s; text-transform: uppercase; text-align: center;
-            box-shadow: 0 4px 0 var(--nero-inchiostro);
+        .app-header .subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+            letter-spacing: 3px;
         }
 
-        .btn-circle:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--nero-inchiostro); }
-        .btn-add { background: var(--verde-go); color: white; }
-        .btn-undo { background: var(--giallo-warn); color: black; }
-        .btn-clear { background: var(--rosso-napoli); color: white; }
-
-        /* GRIGLIA PIZZE */
-        .section-label { width: 100%; max-width: 800px; font-family: 'Alfa Slab One'; color: var(--rosso-napoli); margin: 15px 0; border-bottom: 2px solid var(--nero-inchiostro); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; width: 100%; max-width: 800px; }
-        
-        .cell {
-            aspect-ratio: 1/1; background: var(--bianco-carta); border: 2px solid var(--nero-inchiostro);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; position: relative;
+        /* ============================================
+           LCD DISPLAY — STILE CRT / FOSFORO
+           ============================================ */
+        .lcd-frame {
+            width: 100%;
+            max-width: 640px;
+            background: linear-gradient(145deg, #222, #1a1a1a);
+            border: 3px solid #444;
+            border-radius: var(--radius-lg);
+            padding: 4px;
+            box-shadow:
+                0 6px 20px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            margin-bottom: 20px;
         }
-        .cell.active { background: var(--nero-inchiostro); color: var(--avorio); }
-        .cell .price { position: absolute; top: 2px; right: 4px; font-size: 0.7rem; font-weight: bold; }
-        .cell .symbol { font-family: 'Alfa Slab One'; font-size: 1.3rem; }
-        .cell .name { font-size: 0.55rem; text-transform: uppercase; text-align: center; padding: 0 2px; }
 
-        .cat-sp { border-color: var(--rosso-napoli); color: var(--rosso-napoli); }
-        .cat-ex { border-style: dashed; }
-
-        .toggle-wide {
-            width: 100%; max-width: 800px; margin-top: 15px;
-            padding: 15px; background: var(--bianco-carta); border: 2px solid var(--nero-inchiostro);
-            font-family: 'Oswald'; font-weight: bold; cursor: pointer;
+        .lcd-frame::before,
+        .lcd-frame::after {
+            content: '⚙';
+            position: absolute;
+            top: 8px;
+            font-size: 0.6rem;
+            color: #555;
         }
-        .toggle-wide.active { background: var(--rosso-napoli); color: white; }
+
+        .lcd-frame::before {
+            left: 10px;
+        }
+
+        .lcd-frame::after {
+            right: 10px;
+        }
+
+        .lcd-screen {
+            background: var(--lcd-bg);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        /* scanline effect */
+        .lcd-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.08) 2px,
+                    rgba(0, 0, 0, 0.08) 4px);
+            pointer-events: none;
+        }
+
+        .lcd-history {
+            height: 72px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--lcd-green);
+            text-shadow: 0 0 6px rgba(57, 255, 94, 0.4);
+            border-bottom: 1px solid #1a2a1a;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            opacity: 0.85;
+            scrollbar-width: thin;
+            scrollbar-color: #2a3a2a transparent;
+        }
+
+        .lcd-history::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .lcd-history::-webkit-scrollbar-thumb {
+            background: #2a3a2a;
+            border-radius: 2px;
+        }
+
+        .lcd-current {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: #fff;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+            min-height: 1.4em;
+            margin-bottom: 6px;
+        }
+
+        .lcd-total {
+            font-family: var(--font-mono);
+            font-size: 2.8rem;
+            font-weight: bold;
+            text-align: right;
+            color: var(--lcd-amber);
+            text-shadow: 0 0 15px rgba(255, 191, 0, 0.4);
+            line-height: 1;
+        }
+
+        .lcd-total .euro {
+            font-size: 1.6rem;
+            opacity: 0.6;
+        }
+
+        /* Flash feedback */
+        .lcd-screen.flash-error {
+            animation: flashRed 0.4s ease;
+        }
+
+        @keyframes flashRed {
+
+            0%,
+            100% {
+                box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+            }
+
+            50% {
+                box-shadow: inset 0 0 40px rgba(230, 57, 70, 0.5);
+            }
+        }
+
+        /* ============================================
+           CONTROLS BAR — Bottoni + Toggle su una riga
+           ============================================ */
+        .controls-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 640px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-mech {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-body);
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.1s, box-shadow 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-mech .icon {
+            font-size: 1.3rem;
+            margin-bottom: 1px;
+        }
+
+        .btn-mech:active {
+            transform: translateY(3px);
+        }
+
+        .btn-reset {
+            background: linear-gradient(145deg, #f04050, #c22a38);
+            color: #fff;
+            box-shadow: 0 4px 0 #8a1a24, 0 6px 12px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-reset:active {
+            box-shadow: 0 1px 0 #8a1a24;
+        }
+
+        .btn-undo {
+            background: linear-gradient(145deg, #ffc42e, #d49500);
+            color: #1a1a1a;
+            box-shadow: 0 4px 0 #8a6600, 0 6px 12px rgba(244, 163, 0, 0.3);
+        }
+
+        .btn-undo:active {
+            box-shadow: 0 1px 0 #8a6600;
+        }
+
+        .btn-add {
+            background: linear-gradient(145deg, #38e070, #1f9a48);
+            color: #fff;
+            box-shadow: 0 4px 0 #136630, 0 6px 12px rgba(46, 196, 106, 0.3);
+        }
+
+        .btn-add:active {
+            box-shadow: 0 1px 0 #136630;
+        }
+
+        /* Divider tra bottoni e toggle */
+        .controls-divider {
+            width: 1px;
+            height: 50px;
+            background: var(--border-subtle);
+        }
+
+        /* Option button groups */
+        .opt-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .opt-label {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .btn-opt {
+            padding: 8px 10px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+
+        .btn-opt:hover {
+            border-color: var(--border-medium);
+            background: var(--bg-card-hover);
+        }
+
+        .btn-opt:active {
+            transform: scale(0.93);
+        }
+
+        .btn-opt.active {
+            background: linear-gradient(135deg, var(--accent-gold), #c78500);
+            border-color: var(--accent-gold);
+            color: #1a1a1a;
+            box-shadow: 0 0 12px rgba(244, 163, 0, 0.25);
+        }
+
+        .opt-group .opt-total {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--accent-gold);
+            min-width: 38px;
+            text-align: center;
+        }
+
+        /* ============================================
+           CATEGORY TABS
+           ============================================ */
+        .category-tabs {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+            max-width: 640px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 8px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-medium);
+        }
+
+        .tab-btn.active {
+            border-bottom-width: 3px;
+        }
+
+        .tab-btn .tab-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .tab-btn[data-cat="classic"] .tab-dot {
+            background: var(--accent-blue);
+        }
+
+        .tab-btn[data-cat="calzone"] .tab-dot {
+            background: var(--accent-green);
+        }
+
+        .tab-btn[data-cat="special"] .tab-dot {
+            background: var(--accent-red);
+        }
+
+        .tab-btn[data-cat="classic"].active {
+            background: rgba(78, 168, 222, 0.15);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .tab-btn[data-cat="calzone"].active {
+            background: rgba(46, 196, 106, 0.15);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .tab-btn[data-cat="special"].active {
+            background: rgba(230, 57, 70, 0.15);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        /* Grid panels — show/hide */
+        .element-grid.grid-panel {
+            display: none;
+        }
+
+        .element-grid.grid-panel.visible {
+            display: grid;
+        }
+
+        /* ============================================
+           SEZIONI — TAVOLA PERIODICA
+           ============================================ */
+        .section {
+            width: 100%;
+            max-width: 640px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-subtle);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-classic {
+            background: var(--accent-blue);
+        }
+
+        .dot-calzone {
+            background: var(--accent-green);
+        }
+
+        .dot-special {
+            background: var(--accent-red);
+        }
+
+        .dot-extra {
+            background: var(--accent-gold);
+        }
+
+        /* ============================================
+           CELLE — STILE ELEMENTO PERIODICO
+           ============================================ */
+        .element-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        .element {
+            aspect-ratio: 1 / 1;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            padding: 4px;
+        }
+
+        .element:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+        }
+
+        /* --- Classiche (blue) --- */
+        .element.cat-classic {
+            border-left-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .element.cat-classic .el-symbol {
+            color: var(--accent-blue);
+        }
+
+        .element.cat-classic .el-name {
+            color: var(--accent-blue);
+        }
+
+        .element.cat-classic .el-price {
+            color: var(--accent-blue);
+            opacity: 0.7;
+        }
+
+        .element.cat-classic.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 20px rgba(78, 168, 222, 0.3);
+        }
+
+        .element.cat-classic.active .el-symbol,
+        .element.cat-classic.active .el-name {
+            color: #fff;
+        }
+
+        .element.cat-classic.active .el-price {
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 1;
+        }
+
+        /* --- Calzoni (green) --- */
+        .element.cat-calzone {
+            border-left-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .element.cat-calzone .el-symbol {
+            color: var(--accent-green);
+        }
+
+        .element.cat-calzone .el-name {
+            color: var(--accent-green);
+        }
+
+        .element.cat-calzone .el-price {
+            color: var(--accent-green);
+            opacity: 0.7;
+        }
+
+        .element.cat-calzone.active {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 20px rgba(46, 196, 106, 0.3);
+        }
+
+        .element.cat-calzone.active .el-symbol,
+        .element.cat-calzone.active .el-name {
+            color: #fff;
+        }
+
+        .element.cat-calzone.active .el-price {
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 1;
+        }
+
+        /* --- Speciali (red) --- */
+        .element.cat-special {
+            border-left-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .element.cat-special .el-symbol {
+            color: var(--accent-red);
+        }
+
+        .element.cat-special .el-name {
+            color: var(--accent-red);
+        }
+
+        .element.cat-special .el-price {
+            color: var(--accent-red);
+            opacity: 0.7;
+        }
+
+        .element.cat-special.active {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            box-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
+        }
+
+        .element.cat-special.active .el-symbol,
+        .element.cat-special.active .el-name {
+            color: #fff;
+        }
+
+        .element.cat-special.active .el-price {
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 1;
+        }
+
+        /* --- Extra (gold) --- */
+        .element.cat-extra {
+            border-left-color: var(--accent-gold);
+            border-style: solid;
+            border-left-style: solid;
+            color: var(--accent-gold);
+        }
+
+        .element.cat-extra .el-symbol {
+            color: var(--accent-gold);
+        }
+
+        .element.cat-extra .el-name {
+            color: var(--accent-gold);
+        }
+
+        .element.cat-extra .el-price {
+            color: var(--accent-gold);
+            opacity: 0.7;
+        }
+
+        .element.cat-extra.active {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px rgba(244, 163, 0, 0.3);
+        }
+
+        .element.cat-extra.active .el-symbol,
+        .element.cat-extra.active .el-name {
+            color: #1a1a1a;
+        }
+
+        .element.cat-extra.active .el-price {
+            color: rgba(0, 0, 0, 0.6);
+            opacity: 1;
+        }
+
+        .el-price {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: bold;
+        }
+
+        .el-symbol {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .el-name {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           LEGEND
+           ============================================ */
+        .legend {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            max-width: 640px;
+            margin-bottom: 16px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .app-footer {
+            margin-top: 30px;
+            padding: 16px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+        }
+
+        /* ============================================
+           RESPONSIVE — TABLET (≤ 768px)
+           ============================================ */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .element-grid {
+                grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+                gap: 6px;
+            }
+
+            .btn-mech {
+                width: 62px;
+                height: 62px;
+            }
+
+            .controls-bar {
+                gap: 10px;
+            }
+
+            .btn-opt {
+                padding: 8px 10px;
+                font-size: 0.6rem;
+            }
+        }
+
+        /* ============================================
+           RESPONSIVE — MOBILE (≤ 480px)
+           ============================================ */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .app-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .lcd-total {
+                font-size: 2.2rem;
+            }
+
+            .lcd-history {
+                height: 60px;
+                font-size: 0.75rem;
+            }
+
+            .lcd-current {
+                font-size: 0.9rem;
+            }
+
+            .controls-bar {
+                gap: 8px;
+            }
+
+            .btn-mech {
+                width: 52px;
+                height: 52px;
+                font-size: 0.5rem;
+            }
+
+            .btn-mech .icon {
+                font-size: 1.1rem;
+            }
+
+            .controls-divider {
+                height: 40px;
+            }
+
+            .btn-opt {
+                padding: 7px 8px;
+                font-size: 0.55rem;
+            }
+
+            .category-tabs {
+                gap: 4px;
+            }
+
+            .tab-btn {
+                padding: 10px 6px;
+                font-size: 0.7rem;
+                letter-spacing: 0.5px;
+            }
+
+            .element-grid {
+                grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+                gap: 5px;
+            }
+
+            .el-symbol {
+                font-size: 1.3rem;
+            }
+
+            .el-name {
+                font-size: 0.5rem;
+            }
+
+            .el-price {
+                font-size: 0.6rem;
+            }
+
+            .section-title {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ============================================
+           RESPONSIVE — SMALL MOBILE (≤ 360px)
+           ============================================ */
+        @media (max-width: 360px) {
+            .element-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .btn-mech {
+                width: 46px;
+                height: 46px;
+            }
+
+            .btn-mech .icon {
+                font-size: 1rem;
+            }
+
+            .controls-divider {
+                height: 34px;
+            }
+
+            .btn-opt {
+                padding: 5px 6px;
+                font-size: 0.5rem;
+            }
+
+            .tab-btn {
+                font-size: 0.6rem;
+                padding: 8px 4px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-    <div id="calculator-screen">
-        <div class="lcd-history" id="history">Comanda Vuota...</div>
-        <div class="lcd-current" id="current-str">Seleziona Pizza</div>
-        <div class="lcd-total" id="total-val">0.00</div>
+    <header class="app-header">
+        <img src="da-marcolino-logo.svg" alt="Da Marcolino" class="app-logo">
+        <div class="subtitle">Pizza Calc Pro</div>
+    </header>
+
+    <!-- LCD DISPLAY -->
+    <div class="lcd-frame">
+        <div class="lcd-screen" id="lcd-screen">
+            <div class="lcd-history" id="history">Comanda vuota...</div>
+            <div class="lcd-current" id="current-str">Seleziona una pizza</div>
+            <div class="lcd-total" id="total-val"><span class="euro">€</span> 0.00</div>
+        </div>
     </div>
 
-    <div class="circle-actions">
-        <div class="btn-circle btn-clear" onclick="resetAll()">C<br>Reset</div>
-        <div class="btn-circle btn-undo" onclick="removeLast()">←<br>Canc</div>
-        <div class="btn-circle btn-add" onclick="pushToHistory()">+<br>Invio</div>
+    <!-- CONTROLS BAR -->
+    <div class="controls-bar">
+        <button class="btn-mech btn-reset" id="btn-reset" onclick="resetAll()" aria-label="Reset comanda">
+            <span class="icon">✕</span> Reset
+        </button>
+        <button class="btn-mech btn-undo" id="btn-undo" onclick="removeLast()" aria-label="Annulla ultimo">
+            <span class="icon">←</span> Canc
+        </button>
+        <button class="btn-mech btn-add" id="btn-add" onclick="pushToHistory()" aria-label="Aggiungi alla comanda">
+            <span class="icon">+</span> Invio
+        </button>
+        <div class="controls-divider"></div>
+        <div class="opt-group">
+            <span class="opt-label">🍞</span>
+            <button class="btn-opt" onclick="addDoppio(1.00)" aria-label="Aggiungi 1 euro">+€1</button>
+            <button class="btn-opt" onclick="addDoppio(0.50)" aria-label="Aggiungi 50 centesimi">+50c</button>
+            <span class="opt-total" id="doppio-total"></span>
+        </div>
+        <div class="controls-divider"></div>
+        <div class="opt-group">
+            <span class="opt-label">🚚</span>
+            <button class="btn-opt" id="btn-trasp-1" onclick="setTrasporto(1)" aria-label="Trasporto 1 euro">€1</button>
+            <button class="btn-opt" id="btn-trasp-2" onclick="setTrasporto(2)" aria-label="Trasporto 2 euro">€2</button>
+        </div>
     </div>
 
-    <button class="toggle-wide" id="btn-trasporto" onclick="toggleOption('trasporto', 2.5)">🚚 AGGIUNGI TRASPORTO (+2.50€)</button>
-    <button class="toggle-wide" id="btn-doppio" onclick="toggleOption('doppio', 1.5)">🍞 DOPPIO IMPASTO (+1.50€)</button>
+    <!-- CATEGORY TABS -->
+    <div class="category-tabs">
+        <button class="tab-btn active" data-cat="classic" onclick="switchTab('classic')">
+            <span class="tab-dot"></span>Classiche
+        </button>
+        <button class="tab-btn" data-cat="calzone" onclick="switchTab('calzone')">
+            <span class="tab-dot"></span>Calzoni
+        </button>
+        <button class="tab-btn" data-cat="special" onclick="switchTab('special')">
+            <span class="tab-dot"></span>Speciali
+        </button>
+    </div>
 
-    <div class="section-label">Menu Pizze</div>
-    <div class="grid" id="pizza-grid"></div>
+    <!-- PIZZA GRIDS (tab-switched) -->
+    <section class="section">
+        <div class="element-grid grid-panel visible" id="grid-classic"></div>
+        <div class="element-grid grid-panel" id="grid-calzone"></div>
+        <div class="element-grid grid-panel" id="grid-special"></div>
+    </section>
 
-    <div class="section-label">Extra</div>
-    <div class="grid" id="extra-grid"></div>
+    <!-- EXTRA GRID (always visible) -->
+    <section class="section">
+        <div class="section-title"><span class="dot dot-extra"></span> Extra</div>
+        <div class="element-grid" id="extra-grid"></div>
+    </section>
+
+    <footer class="app-footer">
+        Da Marcolino &bull; Pizza Calc Pro v2.0
+    </footer>
 
     <script>
-        const pizze = [
-            { id: 'Mg', n: 'Margherita', p: 5.0, c: 'cl' }, { id: 'Ma', n: 'Marinara', p: 4.5, c: 'cl' },
-            { id: 'Di', n: 'Diavola', p: 7.0, c: 'cl' }, { id: 'Rg', n: 'Regina', p: 8.0, c: 'cl' },
-            { id: '4S', n: '4 Stagioni', p: 7.0, c: 'cl' }, { id: 'Mz', n: 'Mortazza', p: 11.0, c: 'sp' },
-            { id: 'Ne', n: 'Nerano', p: 9.0, c: 'sp' }, { id: 'Ti', n: 'Tramonto', p: 10.0, c: 'sp' },
-            { id: 'Mc', n: 'Marcolino', p: 8.5, c: 'sp' }, { id: 'Be', n: 'Bella', p: 10.0, c: 'sp' }
-            // Aggiungi qui le altre dal PDF... [cite: 1, 68, 101]
+        /* =============================================
+           CONFIG — Single source of truth
+           ============================================= */
+        const OPTIONS = {
+            trasporto: 2.50,
+            doppio: 1.50
+        };
+
+        const PIZZE = [
+            // LE CLASSICHE
+            { id: 'Fo', name: 'Focaccia', price: 4.00, category: 'classic' },
+            { id: 'Ma', name: 'Marinara', price: 4.50, category: 'classic' },
+            { id: 'Mg', name: 'Margherita', price: 5.00, category: 'classic' },
+            { id: 'Rg', name: 'Regina', price: 8.00, category: 'classic' },
+            { id: 'Pr', name: 'Prosciutto', price: 7.00, category: 'classic' },
+            { id: 'PF', name: 'Prosc. e Funghi', price: 7.00, category: 'classic' },
+            { id: 'Cp', name: 'Capricciosa', price: 8.00, category: 'classic' },
+            { id: 'Di', name: 'Diavola', price: 7.00, category: 'classic' },
+            { id: '4S', name: '4 Stagioni', price: 7.00, category: 'classic' },
+            { id: 'Na', name: 'Napoli', price: 7.00, category: 'classic' },
+            { id: 'Ro', name: 'Romana', price: 7.00, category: 'classic' },
+            { id: 'TC', name: 'Tonno e Cipolla', price: 8.00, category: 'classic' },
+            { id: '4F', name: '4 Formaggi', price: 8.00, category: 'classic' },
+            { id: 'Ve', name: 'Vegetariana', price: 7.00, category: 'classic' },
+
+            // I CALZONI
+            { id: 'CC', name: 'Calzone Classico', price: 7.00, category: 'calzone' },
+            { id: 'CF', name: 'Calzone Farcito', price: 8.00, category: 'calzone' },
+            { id: 'CR', name: 'Calzone Fritto', price: 9.00, category: 'calzone' },
+
+            // LE SPECIALI
+            { id: 'Pp', name: 'Patapizza', price: 7.50, category: 'special' },
+            { id: 'Am', name: 'Americana', price: 8.00, category: 'special' },
+            { id: 'Cl', name: 'Calamari Fritti', price: 9.00, category: 'special' },
+            { id: 'SF', name: 'Sals. e Friarielli', price: 8.00, category: 'special' },
+            { id: 'Sa', name: 'Saporita', price: 8.00, category: 'special' },
+            { id: 'Mc', name: 'Marcolino', price: 8.50, category: 'special' },
+            { id: 'Es', name: 'Estiva', price: 8.00, category: 'special' },
+            { id: 'Tn', name: 'Tonnara', price: 8.00, category: 'special' },
+            { id: 'Cb', name: 'Calabrese', price: 8.50, category: 'special' },
+            { id: 'Lo', name: 'Longobarda', price: 8.50, category: 'special' },
+            { id: 'Bo', name: 'Boscaiola', price: 8.50, category: 'special' },
+            { id: 'Dl', name: 'Delizia', price: 9.00, category: 'special' },
+            { id: 'Be', name: 'Bella', price: 10.00, category: 'special' },
+            { id: 'Dv', name: 'Dolcevita', price: 8.00, category: 'special' },
+            { id: 'Rs', name: 'Rosita', price: 10.00, category: 'special' },
+            { id: 'Fr', name: 'Frecciarossa', price: 8.00, category: 'special' },
+            { id: 'Pg', name: 'Parmigiana', price: 7.50, category: 'special' },
+            { id: 'Ne', name: 'Nerano', price: 9.00, category: 'special' },
+            { id: 'No', name: 'Nordica', price: 10.00, category: 'special' },
+            { id: 'Mz', name: 'Mortazza', price: 11.00, category: 'special' },
+            { id: 'Mt', name: 'Montanara', price: 10.00, category: 'special' },
+            { id: 'Ti', name: 'Tramonto', price: 10.00, category: 'special' }
         ];
 
-        const extras = [
-            { id: 'Pt', n: 'Patatine', p: 1.5 }, { id: 'Bu', n: 'Burrata', p: 2.5 },
-            { id: 'Ex', n: 'Mozzarella', p: 1.0 }, { id: 'Cr', n: 'Crudo', p: 2.0 }
+        const EXTRAS = [
+            { id: 'Pt', name: 'Patatine', price: 1.50 },
+            { id: 'Bu', name: 'Burrata', price: 2.50 },
+            { id: 'Mx', name: 'Mozzarella', price: 1.00 },
+            { id: 'Cr', name: 'Crudo', price: 2.00 }
         ];
 
-        let comanda = [];
-        let cur = { base: null, extras: [], doppio: false };
-        let trasporto = false;
+        /* =============================================
+           STATE
+           ============================================= */
+        const state = {
+            comanda: [],
+            current: { base: null, extras: [], doppioAmount: 0 },
+            trasportoAmount: 0
+        };
 
+        /* =============================================
+           DOM REFS
+           ============================================= */
+        const $ = id => document.getElementById(id);
+
+        /* =============================================
+           INIT
+           ============================================= */
         function init() {
-            const pG = document.getElementById('pizza-grid');
-            pizze.forEach(p => {
-                const d = document.createElement('div');
-                d.className = `cell ${p.c === 'sp' ? 'cat-sp' : ''}`;
-                d.innerHTML = `<div class="price">${p.p}</div><div class="symbol">${p.id}</div><div class="name">${p.n}</div>`;
-                d.onclick = () => { cur.base = p; update(); };
-                pG.appendChild(d);
-            });
+            buildPizzaGrid();
+            buildExtraGrid();
+            loadFromStorage();
+            updateDisplay();
+        }
 
-            const eG = document.getElementById('extra-grid');
-            extras.forEach(e => {
-                const d = document.createElement('div');
-                d.className = `cell cat-ex`;
-                d.id = `ex-${e.id}`;
-                d.innerHTML = `<div class="price">+${e.p}</div><div class="symbol">${e.id}</div><div class="name">${e.n}</div>`;
-                d.onclick = () => {
-                    const i = cur.extras.findIndex(x => x.id === e.id);
-                    if(i > -1) cur.extras.splice(i, 1); else cur.extras.push(e);
-                    d.classList.toggle('active');
-                    update();
-                };
-                eG.appendChild(d);
+        function buildPizzaGrid() {
+            const catMap = {
+                classic: { grid: $('grid-classic'), css: 'cat-classic' },
+                calzone: { grid: $('grid-calzone'), css: 'cat-calzone' },
+                special: { grid: $('grid-special'), css: 'cat-special' }
+            };
+            PIZZE.forEach(pizza => {
+                const cat = catMap[pizza.category];
+                const el = document.createElement('button');
+                el.className = `element ${cat.css}`;
+                el.id = `pizza-${pizza.id}`;
+                el.setAttribute('aria-label', `${pizza.name} — €${pizza.price.toFixed(2)}`);
+                el.innerHTML = `
+                    <span class="el-price">${pizza.price.toFixed(2)}</span>
+                    <span class="el-symbol">${pizza.id}</span>
+                    <span class="el-name">${pizza.name}</span>
+                `;
+                el.onclick = () => selectPizza(pizza);
+                cat.grid.appendChild(el);
             });
         }
 
-        function toggleOption(id, val) {
-            if(id === 'trasporto') trasporto = !trasporto;
-            else cur.doppio = !cur.doppio;
-            document.getElementById(`btn-${id}`).classList.toggle('active');
-            update();
+        function buildExtraGrid() {
+            const grid = $('extra-grid');
+            EXTRAS.forEach(extra => {
+                const el = document.createElement('button');
+                el.className = 'element cat-extra';
+                el.id = `extra-${extra.id}`;
+                el.setAttribute('aria-label', `${extra.name} — +€${extra.price.toFixed(2)}`);
+                el.innerHTML = `
+                    <span class="el-price">+${extra.price.toFixed(2)}</span>
+                    <span class="el-symbol">${extra.id}</span>
+                    <span class="el-name">${extra.name}</span>
+                `;
+                el.onclick = () => toggleExtra(extra);
+                grid.appendChild(el);
+            });
         }
 
-        function update() {
-            let s = cur.base ? cur.base.n : "---";
-            cur.extras.forEach(e => s += " + " + e.n);
-            if(cur.doppio) s += " (D.I.)";
-            document.getElementById('current-str').innerText = s;
+        /* =============================================
+           USER ACTIONS
+           ============================================= */
+        function selectPizza(pizza) {
+            state.current.base = pizza;
+            // Highlight selected pizza across all grids
+            document.querySelectorAll('#grid-classic .element, #grid-calzone .element, #grid-special .element').forEach(el => el.classList.remove('active'));
+            $(`pizza-${pizza.id}`).classList.add('active');
+            updateDisplay();
+        }
 
-            let t = comanda.reduce((acc, v) => acc + v.p, 0);
-            let c = cur.base ? cur.base.p : 0;
-            cur.extras.forEach(e => c += e.p);
-            if(cur.doppio) c += 1.5;
-            if(trasporto) t += 2.5;
+        function toggleExtra(extra) {
+            const idx = state.current.extras.findIndex(e => e.id === extra.id);
+            if (idx > -1) {
+                state.current.extras.splice(idx, 1);
+            } else {
+                state.current.extras.push(extra);
+            }
+            $(`extra-${extra.id}`).classList.toggle('active');
+            updateDisplay();
+        }
 
-            document.getElementById('total-val').innerText = (t + c).toFixed(2);
+        function addDoppio(amount) {
+            state.current.doppioAmount = +(state.current.doppioAmount + amount).toFixed(2);
+            updateDoppioDisplay();
+            updateDisplay();
+        }
+
+        function updateDoppioDisplay() {
+            const el = $('doppio-total');
+            if (state.current.doppioAmount > 0) {
+                el.textContent = `+€${state.current.doppioAmount.toFixed(2)}`;
+            } else {
+                el.textContent = '';
+            }
+        }
+
+        function setTrasporto(amount) {
+            if (state.trasportoAmount === amount) {
+                state.trasportoAmount = 0;
+                $('btn-trasp-1').classList.remove('active');
+                $('btn-trasp-2').classList.remove('active');
+            } else {
+                state.trasportoAmount = amount;
+                $('btn-trasp-1').classList.toggle('active', amount === 1);
+                $('btn-trasp-2').classList.toggle('active', amount === 2);
+            }
+            updateDisplay();
+            saveToStorage();
+        }
+
+        function switchTab(category) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-cat="${category}"]`).classList.add('active');
+            // Show/hide grid panels
+            document.querySelectorAll('.grid-panel').forEach(p => p.classList.remove('visible'));
+            $(`grid-${category}`).classList.add('visible');
         }
 
         function pushToHistory() {
-            if(!cur.base) return;
-            let p = cur.base.p + cur.extras.reduce((a,b) => a + b.p, 0) + (cur.doppio ? 1.5 : 0);
-            let n = cur.base.n + (cur.extras.length ? " +" + cur.extras.length + "ex" : "");
-            comanda.push({ n, p });
-            cur = { base: null, extras: [], doppio: false };
-            document.querySelectorAll('.cat-ex, #btn-doppio').forEach(el => el.classList.remove('active'));
+            if (!state.current.base) {
+                // Flash error feedback
+                const screen = $('lcd-screen');
+                screen.classList.add('flash-error');
+                setTimeout(() => screen.classList.remove('flash-error'), 400);
+                return;
+            }
+
+            const extrasTotal = state.current.extras.reduce((sum, e) => sum + e.price, 0);
+            const itemPrice = state.current.base.price + extrasTotal + state.current.doppioAmount;
+
+            let itemName = state.current.base.name;
+            if (state.current.extras.length) {
+                itemName += ' +' + state.current.extras.map(e => e.name).join(', +');
+            }
+            if (state.current.doppioAmount > 0) {
+                itemName += ` (+€${state.current.doppioAmount.toFixed(2)})`;
+            }
+
+            state.comanda.push({ name: itemName, price: itemPrice });
+
+            // Reset current selection
+            state.current = { base: null, extras: [], doppioAmount: 0 };
+            document.querySelectorAll('#grid-classic .element, #grid-calzone .element, #grid-special .element, .cat-extra').forEach(el => el.classList.remove('active'));
+            $('doppio-total').textContent = '';
+
             renderHistory();
-            update();
+            updateDisplay();
+            saveToStorage();
+        }
+
+        function removeLast() {
+            state.comanda.pop();
+            renderHistory();
+            updateDisplay();
+            saveToStorage();
+        }
+
+        function resetAll() {
+            if (!confirm('Resetti tutta la comanda?')) return;
+
+            state.comanda = [];
+            state.trasportoAmount = 0;
+            state.current = { base: null, extras: [], doppioAmount: 0 };
+
+            document.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
+            $('doppio-total').textContent = '';
+            renderHistory();
+            updateDisplay();
+            saveToStorage();
+        }
+
+        /* =============================================
+           RENDERING
+           ============================================= */
+        function updateDisplay() {
+            // Current selection line
+            let label = state.current.base ? state.current.base.name : '---';
+            state.current.extras.forEach(e => label += ' + ' + e.name);
+            if (state.current.doppioAmount > 0) label += ` (+€${state.current.doppioAmount.toFixed(2)})`;
+            $('current-str').textContent = label;
+
+            // Total calculation
+            const comandaTotal = state.comanda.reduce((sum, item) => sum + item.price, 0);
+            const currentPrice = (state.current.base ? state.current.base.price : 0)
+                + state.current.extras.reduce((sum, e) => sum + e.price, 0)
+                + state.current.doppioAmount;
+            const grandTotal = comandaTotal + currentPrice + state.trasportoAmount;
+
+            $('total-val').innerHTML = `<span class="euro">€</span> ${grandTotal.toFixed(2)}`;
         }
 
         function renderHistory() {
-            const h = document.getElementById('history');
-            h.innerHTML = comanda.map((v, i) => `<div>${i+1}. ${v.n} - ${v.p.toFixed(2)}</div>`).join('');
-            h.scrollTop = h.scrollHeight;
+            const historyEl = $('history');
+            if (state.comanda.length === 0) {
+                historyEl.textContent = 'Comanda vuota...';
+                return;
+            }
+            historyEl.innerHTML = state.comanda
+                .map((item, i) => `<div>${i + 1}. ${item.name} — €${item.price.toFixed(2)}</div>`)
+                .join('');
+            historyEl.scrollTop = historyEl.scrollHeight;
         }
 
-        function removeLast() { comanda.pop(); renderHistory(); update(); }
-        function resetAll() { if(confirm("Resetti tutto?")) { comanda=[]; trasporto=false; cur={base:null, extras:[], doppio:false}; document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); renderHistory(); update(); } }
+        /* =============================================
+           PERSISTENCE — localStorage
+           ============================================= */
+        function saveToStorage() {
+            try {
+                localStorage.setItem('pizzacalc_comanda', JSON.stringify(state.comanda));
+                localStorage.setItem('pizzacalc_trasporto', JSON.stringify(state.trasportoAmount));
+            } catch (e) { /* ignore quota errors */ }
+        }
 
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('pizzacalc_comanda');
+                const savedTrasporto = localStorage.getItem('pizzacalc_trasporto');
+                if (saved) {
+                    state.comanda = JSON.parse(saved);
+                    renderHistory();
+                }
+                if (savedTrasporto) {
+                    const amount = JSON.parse(savedTrasporto);
+                    if (amount > 0) {
+                        setTrasporto(amount);
+                    }
+                }
+            } catch (e) { /* ignore parse errors */ }
+        }
+
+        /* =============================================
+           BOOT
+           ============================================= */
         init();
     </script>
 </body>
+
 </html>
