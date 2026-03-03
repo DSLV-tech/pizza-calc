@@ -3,286 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Da Marcolino - Calcolatrice Comande</title>
-    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Oswald:wght@400;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+    <title>Da Marcolino - Pizza Calc Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Oswald:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --rosso-napoli: #D81B1B;
-            --rosso-profondo: #9B0D0D;
-            --nero-inchiostro: #0D0D0D;
-            --bianco-carta: #FFFDF5;
-            --avorio: #F0EBD8;
-            --extra-green: #2d5a27;
+            --rosso-napoli: #D81B1B; /*  */
+            --nero-inchiostro: #0D0D0D; /*  */
+            --bianco-carta: #FFFDF5; /*  */
+            --avorio: #F0EBD8; /*  */
+            --verde-go: #27ae60;
+            --giallo-warn: #f1c40f;
         }
 
         body {
             font-family: 'Oswald', sans-serif;
             background-color: var(--avorio);
             color: var(--nero-inchiostro);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        header h1 {
-            font-family: 'Alfa Slab One', cursive;
-            color: var(--rosso-napoli);
-            margin: 0;
-            text-transform: uppercase;
-            font-size: 2rem;
-        }
-
-        /* DISPLAY COMANDA STILE "SCONTRINO" */
-        #display {
-            background: var(--bianco-carta);
-            width: 100%;
-            max-width: 800px;
-            padding: 20px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 5px;
-            z-index: 1000;
-        }
-
-        .comanda-lista {
-            max-height: 180px;
-            overflow-y: auto;
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            border-bottom: 2px dashed #ccc;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-        }
-
-        .item-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
-
-        .current-build {
-            font-weight: 600;
-            color: var(--rosso-profondo);
-            min-height: 1.5em;
-            font-size: 1.2rem;
-        }
-
-        .totale-riga {
-            font-family: 'Alfa Slab One', sans-serif;
-            font-size: 2.5rem;
-            color: var(--rosso-napoli);
-            text-align: right;
-            margin-top: 5px;
-        }
-
-        /* GRIGLIE E PULSANTI */
-        .section-label {
-            width: 100%;
-            max-width: 800px;
-            background: var(--nero-inchiostro);
-            color: var(--bianco-carta);
-            padding: 5px 15px;
-            margin: 15px 0 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-            gap: 6px;
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .cell {
-            aspect-ratio: 1/1;
-            background: var(--bianco-carta);
-            border: 2px solid var(--nero-inchiostro);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.1s;
-            text-align: center;
-            padding: 4px;
-        }
-
-        .cell:active { transform: scale(0.95); }
-        .cell.active { background: var(--rosso-napoli); color: white; border-color: var(--rosso-profondo); }
-
-        .cell .symbol { font-family: 'Alfa Slab One'; font-size: 1.4rem; }
-        .cell .price { font-size: 0.75rem; font-weight: bold; }
-        .cell .name { font-size: 0.6rem; text-transform: uppercase; margin-top: 2px; line-height: 1; }
-
-        /* PULSANTI AZIONE */
-        .action-bar {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-            max-width: 800px;
-            margin: 20px 0;
-        }
-
-        .btn {
+        /* DISPLAY STILE CALCOLATRICE LCD */
+        #calculator-screen {
+            background: #222;
+            width: 95%; max-width: 600px;
             padding: 15px;
-            font-family: 'Oswald';
-            font-weight: bold;
-            text-transform: uppercase;
-            border: 2px solid var(--nero-inchiostro);
-            cursor: pointer;
-            font-size: 1rem;
+            border-radius: 10px;
+            border: 4px solid #444;
+            box-shadow: inset 0 0 10px #000;
+            margin-bottom: 20px;
+            color: #00ff41; /* Verde Matrix/LCD */
+            font-family: 'Share Tech Mono', monospace;
         }
 
-        .btn-add { background: var(--rosso-napoli); color: white; grid-column: span 2; font-size: 1.3rem; }
-        .btn-del { background: #fff; color: var(--nero-inchiostro); }
-        .btn-reset { background: var(--nero-inchiostro); color: white; }
-        .btn-opt.active { background: var(--rosso-profondo); color: white; }
+        .lcd-history { height: 80px; overflow-y: auto; font-size: 0.85rem; border-bottom: 1px solid #333; margin-bottom: 10px; opacity: 0.8; }
+        .lcd-current { font-size: 1.1rem; min-height: 1.4em; color: #fff; }
+        .lcd-total { font-size: 3rem; text-align: right; font-weight: bold; color: var(--giallo-warn); }
 
+        /* TASTI FUNZIONE CIRCOLARI */
+        .circle-actions {
+            display: flex; justify-content: space-around;
+            width: 100%; max-width: 600px; margin-bottom: 25px;
+        }
+
+        .btn-circle {
+            width: 75px; height: 75px; border-radius: 50%;
+            border: 3px solid var(--nero-inchiostro);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            font-size: 0.7rem; font-weight: bold; cursor: pointer;
+            transition: 0.2s; text-transform: uppercase; text-align: center;
+            box-shadow: 0 4px 0 var(--nero-inchiostro);
+        }
+
+        .btn-circle:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--nero-inchiostro); }
+        .btn-add { background: var(--verde-go); color: white; }
+        .btn-undo { background: var(--giallo-warn); color: black; }
+        .btn-clear { background: var(--rosso-napoli); color: white; }
+
+        /* GRIGLIA PIZZE */
+        .section-label { width: 100%; max-width: 800px; font-family: 'Alfa Slab One'; color: var(--rosso-napoli); margin: 15px 0; border-bottom: 2px solid var(--nero-inchiostro); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; width: 100%; max-width: 800px; }
+        
+        .cell {
+            aspect-ratio: 1/1; background: var(--bianco-carta); border: 2px solid var(--nero-inchiostro);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; position: relative;
+        }
+        .cell.active { background: var(--nero-inchiostro); color: var(--avorio); }
+        .cell .price { position: absolute; top: 2px; right: 4px; font-size: 0.7rem; font-weight: bold; }
+        .cell .symbol { font-family: 'Alfa Slab One'; font-size: 1.3rem; }
+        .cell .name { font-size: 0.55rem; text-transform: uppercase; text-align: center; padding: 0 2px; }
+
+        .cat-sp { border-color: var(--rosso-napoli); color: var(--rosso-napoli); }
+        .cat-ex { border-style: dashed; }
+
+        .toggle-wide {
+            width: 100%; max-width: 800px; margin-top: 15px;
+            padding: 15px; background: var(--bianco-carta); border: 2px solid var(--nero-inchiostro);
+            font-family: 'Oswald'; font-weight: bold; cursor: pointer;
+        }
+        .toggle-wide.active { background: var(--rosso-napoli); color: white; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Da Marcolino</h1>
-        <small>TRATTORIA • PIZZERIA • STROPPIANA</small>
-    </header>
-
-    <div id="display">
-        <div class="comanda-lista" id="lista-comanda">Comanda vuota</div>
-        <div class="current-build" id="build-text">Seleziona una pizza...</div>
-        <div class="totale-riga" id="totale">0.00 €</div>
+    <div id="calculator-screen">
+        <div class="lcd-history" id="history">Comanda Vuota...</div>
+        <div class="lcd-current" id="current-str">Seleziona Pizza</div>
+        <div class="lcd-total" id="total-val">0.00</div>
     </div>
 
-    <div class="action-bar">
-        <button class="btn btn-add" onclick="addCurrent()">➕ AGGIUNGI ALL'ORDINE</button>
-        <button class="btn btn-del" onclick="removeLast()">↩️ RIMUOVI ULTIMA</button>
-        <button class="btn btn-reset" onclick="resetAll()">🗑️ SVUOTA TUTTO</button>
-        <button class="btn btn-opt" id="btn-trasporto" onclick="toggleTrasporto()">🚚 TRASPORTO (+2.50)</button>
-        <button class="btn btn-opt" id="btn-doppio" onclick="toggleDoppio()">🍞 DOPPIO IMPASTO (+1.50)</button>
+    <div class="circle-actions">
+        <div class="btn-circle btn-clear" onclick="resetAll()">C<br>Reset</div>
+        <div class="btn-circle btn-undo" onclick="removeLast()">←<br>Canc</div>
+        <div class="btn-circle btn-add" onclick="pushToHistory()">+<br>Invio</div>
     </div>
 
-    <div class="section-label">Le Classiche</div>
-    <div class="grid" id="grid-cl"></div>
+    <button class="toggle-wide" id="btn-trasporto" onclick="toggleOption('trasporto', 2.5)">🚚 AGGIUNGI TRASPORTO (+2.50€)</button>
+    <button class="toggle-wide" id="btn-doppio" onclick="toggleOption('doppio', 1.5)">🍞 DOPPIO IMPASTO (+1.50€)</button>
 
-    <div class="section-label">Le Speciali</div>
-    <div class="grid" id="grid-sp"></div>
+    <div class="section-label">Menu Pizze</div>
+    <div class="grid" id="pizza-grid"></div>
 
-    <div class="section-label">Ingredienti Extra</div>
-    <div class="grid" id="grid-ex"></div>
+    <div class="section-label">Extra</div>
+    <div class="grid" id="extra-grid"></div>
 
     <script>
-        // Dati estratti dal menu ufficiale e dalla brand identity
         const pizze = [
-            { id: 'Fc', n: 'Focaccia', p: 4.0, c: 'cl' }, { id: 'Ma', n: 'Marinara', p: 4.5, c: 'cl' },
-            { id: 'Mg', n: 'Margherita', p: 5.0, c: 'cl' }, { id: 'Pr', n: 'Prosciutto', p: 7.0, c: 'cl' },
-            { id: 'PF', n: 'Prosc. Funghi', p: 7.0, c: 'cl' }, { id: 'Di', n: 'Diavola', p: 7.0, c: 'cl' },
-            { id: '4S', n: '4 Stagioni', p: 7.0, c: 'cl' }, { id: 'Na', n: 'Napoli', p: 7.0, c: 'cl' },
-            { id: 'Ro', n: 'Romana', p: 7.0, c: 'cl' }, { id: 'Ve', n: 'Vegetariana', p: 7.0, c: 'cl' },
-            { id: 'Cp', n: 'Capricciosa', p: 8.0, c: 'cl' }, { id: 'TC', n: 'Tonno Cip.', p: 8.0, c: 'cl' },
-            { id: '4F', n: '4 Formaggi', p: 8.0, c: 'cl' }, { id: 'Rg', n: 'Regina', p: 8.0, c: 'cl' },
-            { id: 'Pa', n: 'Patapizza', p: 7.5, c: 'sp' }, { id: 'Pm', n: 'Parmigiana', p: 7.5, c: 'sp' },
-            { id: 'Am', n: 'Americana', p: 8.0, c: 'sp' }, { id: 'SF', n: 'Salsiccia Fri.', p: 8.0, c: 'sp' },
-            { id: 'Sa', n: 'Saporita', p: 8.0, c: 'sp' }, { id: 'Es', n: 'Estiva', p: 8.0, c: 'sp' },
-            { id: 'Tn', n: 'Tonnara', p: 8.0, c: 'sp' }, { id: 'Mc', n: 'Marcolino', p: 8.5, c: 'sp' },
-            { id: 'Cb', n: 'Calabrese', p: 8.5, c: 'sp' }, { id: 'Lo', n: 'Longobarda', p: 8.5, c: 'sp' },
-            { id: 'Bo', n: 'Boscaiola', p: 8.5, c: 'sp' }, { id: 'Ca', n: 'Calamari Fr.', p: 9.0, c: 'sp' },
-            { id: 'De', n: 'Delizia', p: 9.0, c: 'sp' }, { id: 'Ne', n: 'Nerano', p: 9.0, c: 'sp' },
-            { id: 'Be', n: 'Bella', p: 10.0, c: 'sp' }, { id: 'Rs', n: 'Rosita', p: 10.0, c: 'sp' },
-            { id: 'No', n: 'Nordica', p: 10.0, c: 'sp' }, { id: 'Mn', n: 'Montanara', p: 10.0, c: 'sp' },
-            { id: 'Ti', n: 'Tramonto It.', p: 10.0, c: 'sp' }, { id: 'Mz', n: 'Mortazza', p: 11.0, c: 'sp' }
+            { id: 'Mg', n: 'Margherita', p: 5.0, c: 'cl' }, { id: 'Ma', n: 'Marinara', p: 4.5, c: 'cl' },
+            { id: 'Di', n: 'Diavola', p: 7.0, c: 'cl' }, { id: 'Rg', n: 'Regina', p: 8.0, c: 'cl' },
+            { id: '4S', n: '4 Stagioni', p: 7.0, c: 'cl' }, { id: 'Mz', n: 'Mortazza', p: 11.0, c: 'sp' },
+            { id: 'Ne', n: 'Nerano', p: 9.0, c: 'sp' }, { id: 'Ti', n: 'Tramonto', p: 10.0, c: 'sp' },
+            { id: 'Mc', n: 'Marcolino', p: 8.5, c: 'sp' }, { id: 'Be', n: 'Bella', p: 10.0, c: 'sp' }
+            // Aggiungi qui le altre dal PDF... [cite: 1, 68, 101]
         ];
 
-        const ingredienti = [
-            { id: 'Pt', n: 'Patatine', p: 1.5 }, { id: 'Br', n: 'Burrata', p: 2.5 },
-            { id: 'Mo', n: 'Mozzarella', p: 1.0 }, { id: 'Cu', n: 'Crudo', p: 2.0 },
-            { id: 'Vd', n: 'Verdure', p: 1.0 }, { id: 'Nj', n: 'Nduja', p: 1.5 }
+        const extras = [
+            { id: 'Pt', n: 'Patatine', p: 1.5 }, { id: 'Bu', n: 'Burrata', p: 2.5 },
+            { id: 'Ex', n: 'Mozzarella', p: 1.0 }, { id: 'Cr', n: 'Crudo', p: 2.0 }
         ];
 
         let comanda = [];
-        let current = { base: null, extras: [], doppio: false };
-        let trasporto = 0;
+        let cur = { base: null, extras: [], doppio: false };
+        let trasporto = false;
 
         function init() {
-            const grids = { cl: document.getElementById('grid-cl'), sp: document.getElementById('grid-sp') };
+            const pG = document.getElementById('pizza-grid');
             pizze.forEach(p => {
-                const div = createCell(p, () => { current.base = p; update(); });
-                grids[p.c].appendChild(div);
+                const d = document.createElement('div');
+                d.className = `cell ${p.c === 'sp' ? 'cat-sp' : ''}`;
+                d.innerHTML = `<div class="price">${p.p}</div><div class="symbol">${p.id}</div><div class="name">${p.n}</div>`;
+                d.onclick = () => { cur.base = p; update(); };
+                pG.appendChild(d);
             });
-            const exGrid = document.getElementById('grid-ex');
-            ingredienti.forEach(i => {
-                const div = createCell(i, () => toggleExtra(i), true);
-                exGrid.appendChild(div);
+
+            const eG = document.getElementById('extra-grid');
+            extras.forEach(e => {
+                const d = document.createElement('div');
+                d.className = `cell cat-ex`;
+                d.id = `ex-${e.id}`;
+                d.innerHTML = `<div class="price">+${e.p}</div><div class="symbol">${e.id}</div><div class="name">${e.n}</div>`;
+                d.onclick = () => {
+                    const i = cur.extras.findIndex(x => x.id === e.id);
+                    if(i > -1) cur.extras.splice(i, 1); else cur.extras.push(e);
+                    d.classList.toggle('active');
+                    update();
+                };
+                eG.appendChild(d);
             });
         }
 
-        function createCell(obj, action, isExtra = false) {
-            const div = document.createElement('div');
-            div.className = 'cell';
-            if(isExtra) div.id = `ex-${obj.id}`;
-            div.innerHTML = `<div class="price">${obj.p.toFixed(1)}€</div><div class="symbol">${obj.id}</div><div class="name">${obj.n}</div>`;
-            div.onclick = action;
-            return div;
-        }
-
-        function toggleExtra(i) {
-            const idx = current.extras.findIndex(x => x.id === i.id);
-            if(idx > -1) current.extras.splice(idx, 1);
-            else current.extras.push(i);
-            document.getElementById(`ex-${i.id}`).classList.toggle('active');
+        function toggleOption(id, val) {
+            if(id === 'trasporto') trasporto = !trasporto;
+            else cur.doppio = !cur.doppio;
+            document.getElementById(`btn-${id}`).classList.toggle('active');
             update();
         }
-
-        function toggleDoppio() { current.doppio = !current.doppio; document.getElementById('btn-doppio').classList.toggle('active'); update(); }
-        function toggleTrasporto() { trasporto = trasporto === 0 ? 2.5 : 0; document.getElementById('btn-trasporto').classList.toggle('active'); update(); }
 
         function update() {
-            let txt = current.base ? current.base.n : "";
-            current.extras.forEach(e => txt += ` + ${e.n}`);
-            if(current.doppio) txt += " (D.I.)";
-            document.getElementById('build-text').innerText = txt || "Seleziona una pizza...";
+            let s = cur.base ? cur.base.n : "---";
+            cur.extras.forEach(e => s += " + " + e.n);
+            if(cur.doppio) s += " (D.I.)";
+            document.getElementById('current-str').innerText = s;
 
-            let runningTot = comanda.reduce((a, b) => a + b.p, 0);
-            let curTot = current.base ? current.base.p : 0;
-            current.extras.forEach(e => curTot += e.p);
-            if(current.doppio) curTot += 1.5;
+            let t = comanda.reduce((acc, v) => acc + v.p, 0);
+            let c = cur.base ? cur.base.p : 0;
+            cur.extras.forEach(e => c += e.p);
+            if(cur.doppio) c += 1.5;
+            if(trasporto) t += 2.5;
 
-            document.getElementById('totale').innerText = (runningTot + curTot + trasporto).toFixed(2) + " €";
+            document.getElementById('total-val').innerText = (t + c).toFixed(2);
         }
 
-        function addCurrent() {
-            if(!current.base) return;
-            let p = current.base.p;
-            let n = current.base.n;
-            current.extras.forEach(e => { p += e.p; n += ` + ${e.n}`; });
-            if(current.doppio) { p += 1.5; n += " (D.I.)"; }
-            
+        function pushToHistory() {
+            if(!cur.base) return;
+            let p = cur.base.p + cur.extras.reduce((a,b) => a + b.p, 0) + (cur.doppio ? 1.5 : 0);
+            let n = cur.base.n + (cur.extras.length ? " +" + cur.extras.length + "ex" : "");
             comanda.push({ n, p });
-            current = { base: null, extras: [], doppio: false };
-            document.querySelectorAll('.cell, .btn-opt').forEach(el => { if(el.id !== 'btn-trasporto') el.classList.remove('active'); });
-            renderComanda();
+            cur = { base: null, extras: [], doppio: false };
+            document.querySelectorAll('.cat-ex, #btn-doppio').forEach(el => el.classList.remove('active'));
+            renderHistory();
             update();
         }
 
-        function renderComanda() {
-            const l = document.getElementById('lista-comanda');
-            if(comanda.length === 0) { l.innerText = "Comanda vuota"; return; }
-            l.innerHTML = comanda.map(i => `<div class="item-line"><span>${i.n}</span><span>${i.p.toFixed(2)}€</span></div>`).join('');
-            l.scrollTop = l.scrollHeight;
+        function renderHistory() {
+            const h = document.getElementById('history');
+            h.innerHTML = comanda.map((v, i) => `<div>${i+1}. ${v.n} - ${v.p.toFixed(2)}</div>`).join('');
+            h.scrollTop = h.scrollHeight;
         }
 
-        function removeLast() { comanda.pop(); renderComanda(); update(); }
-        function resetAll() { if(confirm("Azzero tutto?")) { comanda = []; trasporto = 0; resetUI(); update(); renderComanda(); } }
-        function resetUI() { document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); }
+        function removeLast() { comanda.pop(); renderHistory(); update(); }
+        function resetAll() { if(confirm("Resetti tutto?")) { comanda=[]; trasporto=false; cur={base:null, extras:[], doppio:false}; document.querySelectorAll('.active').forEach(e => e.classList.remove('active')); renderHistory(); update(); } }
 
         init();
     </script>
